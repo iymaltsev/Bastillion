@@ -29,12 +29,16 @@ import java.util.Map;
 public class SecureShellWS {
 
     private static Logger log = LoggerFactory.getLogger(SecureShellWS.class);
+    
+    ///for logging input commands
+    private static Logger consoleLogger = LoggerFactory.getLogger("io.bastillion.manage.util.console");
 
     private HttpSession httpSession = null;
     private Session session = null;
     private Long sessionId = null;
     private Long count = 0L;
-
+    private StringBuilder tStr = new StringBuilder("");
+    private Integer offset = 0;
 
 
     @OnOpen
@@ -76,6 +80,47 @@ public class SecureShellWS {
                 keyCode = keyCodeDbl.intValue();
             }
 
+            ///logging input commands
+            Integer pr = 0;
+            ///consoleLogger.info("input message: " + message + "\n");
+            ///consoleLogger.info("input command: " + command + "\n");
+            if (command == null) {
+                 ///consoleLogger.info("command is null \n");
+                 if (keyCode == 8 && tStr.length() > 0 ){
+                     tStr.deleteCharAt(tStr.length()-offset-1);
+                 }
+                 if (keyCode == 13){
+                    consoleLogger.info("tStr:" + tStr.toString()  + "\n");
+                    tStr.delete(0,tStr.length());
+                    pr = 1;
+                 }
+                 if (keyCode == 37){
+                        if (tStr.length() - offset > 0) {
+                        offset = offset + 1;
+                        }
+                        consoleLogger.info("offset: " + Integer.toString(offset)  + "\n");
+                 }
+
+                 if (keyCode == 39){
+                        if (offset > 0){
+                            offset = offset - 1;
+                            consoleLogger.info("offset: " + Integer.toString(offset)  + "\n");
+                        }
+                 }
+
+            }else {
+                tStr.insert(tStr.length() - offset,command);
+            } 
+
+            ///for debug
+            ///if (pr == 0 ) {
+            ///    consoleLogger.info("tStr:" + tStr.toString()  + "\n");
+            ///}
+            
+            
+            
+            
+            
             for (String idStr : (ArrayList<String>) jsonRoot.get("id")) {
                 Integer id = Integer.parseInt(idStr);
 
